@@ -24,8 +24,8 @@ public class ConversationRepository {
 
     public ServiceResultData addNewMessage(NewMessageRequest request) {
         String sqlInsert = """
-                INSERT INTO MESSAGE(SENDER_ID, RECEIVER_ID, MESSAGE_CONTENT)
-                VALUES(:senderId, :receiverId, :messageContent)
+                INSERT INTO MESSAGE(SENDER_ID, RECEIVER_ID, MESSAGE_CONTENT, MESSAGE_TIMESTAMP)
+                VALUES(:senderId, :receiverId, :messageContent, GETDATE())
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()

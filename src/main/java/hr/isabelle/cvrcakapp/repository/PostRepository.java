@@ -25,14 +25,14 @@ public class PostRepository {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    public ServiceResultData getAllPosts(){
+    public List<Post> getAllPosts(){
         try{
         JdbcParameters jdbcParameters = sqlAllPosts();
 
            List<Post> posts = namedParameterJdbcTemplate.query(jdbcParameters.sqlQuery,
                     jdbcParameters.sqlParameters,
                     new hr.isabelle.cvrcakapp.mapper.PostListMapper());
-           return new ServiceResultData(true, posts);
+           return posts;
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e);
@@ -48,13 +48,13 @@ public class PostRepository {
     }
 
 
-    public ServiceResultData getCommentsCount(Integer postId){
+    public Integer getCommentsCount(Integer postId){
         try{
             JdbcParameters jdbcParameters = sqlCommentsCount(postId);
 
             Integer commentsCount = namedParameterJdbcTemplate.queryForObject(jdbcParameters.sqlQuery,
                     jdbcParameters.sqlParameters, Integer.class);
-            return new ServiceResultData(true, commentsCount);
+            return commentsCount;
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e);
@@ -71,22 +71,23 @@ public class PostRepository {
     }
 
 
-    public ServiceResultData getComments(Integer postId){
+    public List<Comment> getComments(Integer postId){
         try{
             JdbcParameters jdbcParameters = sqlComments(postId);
 
             List<Comment> comments = namedParameterJdbcTemplate.query(jdbcParameters.sqlQuery,
                     jdbcParameters.sqlParameters,
                     new hr.isabelle.cvrcakapp.mapper.CommentListMapper());
-            return new ServiceResultData(true, comments);
+            return comments;
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
     }
+
     private JdbcParameters sqlComments(Integer postId){
         String sqlQuery = """
-                    SELECT USER_ID, COMMENT_CONTENT, COMMENTING_DATETIME, UPDATE_DATETIME FROM POST_COMMENT
+                    SELECT USER_ID, COMMENT_CONTENT, COMMENTING_DATETIME, UPDATE_DATETIME, DELETE_DATETIME FROM POST_COMMENT
                     WHERE POST_ID = :postId AND DELETE_DATETIME IS NULL
                 """.stripIndent();
 
@@ -106,10 +107,10 @@ public class PostRepository {
         return new JdbcParameters(sqlQuery, parameterSource);
     }*/
 
-    public ServiceResultData newPost(PostRequest request) {
+    public Integer newPost(PostRequest request) {
         String sqlInsert = """
-                INSERT INTO POST (USER_ID, POST_TITLE, POST_CONTENT, POSTING_DATETIME, IMAGE, IS_PUBLIC, IS_PERMANENT, DISAPEAR_DATETIME)\s
-                VALUES (:userId, :title, :content, GETDATETIME(), :image, :isPublic, :isPermanent, :disappearTime)
+                INSERT INTO POST (USER_ID, POST_TITLE, POST_CONTENT, POSTING_DATETIME, IMAGE, IS_PUBLIC, IS_PERMANENT, DISAPEAR_DATETIME)
+                VALUES (:userId, :title, :content, getdate(), :image, :isPublic, :isPermanent, :disappearTime)
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
@@ -122,13 +123,13 @@ public class PostRepository {
                 .addValue("disappearTime", request.disappearTime);
 
         namedParameterJdbcTemplate.update(sqlInsert, sqlParameters);
-        return new ServiceResultData(true, request.postId);
+        return request.postId;
     }
 
     public ServiceResultData updatePost(PostRequest request) {
         String sqlUpdate = """
                 UPDATE POST
-                SET POST_TITLE = :title, POST_CONTENT = :content, IMAGE = :image
+                SET POST_TITLE = :title, POST_CONTENT = :content, IMAGE = :image, UPDATE_DATETIME=getdate()
                 WHERE ID_POST = :postId
                 """.stripIndent();
 
@@ -144,7 +145,7 @@ public class PostRepository {
 
     public ServiceResultData deletePost(PostRequest request) {
         String sqlUpdate = """
-                UPDATE POST SET IS_DELETED = 1 WHERE ID_POST = :postId
+                UPDATE POST SET IS_DELETED = 1, DELETE_DATETIME = GETDATE() WHERE ID_POST = :postId
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()

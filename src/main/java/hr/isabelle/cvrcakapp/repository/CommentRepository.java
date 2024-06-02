@@ -21,8 +21,8 @@ public class CommentRepository {
 
     public ServiceResultData commentPost(CommentRequest request) {
         String sqlInsert = """
-                INSERT INTO POST_COMMENT (POST_ID, USER_ID, COMMENT_CONTENT, UPDATE_DATETIME, DELETE_DATETIME)
-                VALUES (:postId, :userId, :content, NULL, NULL)
+                INSERT INTO POST_COMMENT (POST_ID, USER_ID, COMMENT_CONTENT, UPDATE_DATETIME, DELETE_DATETIME, COMMENTING_DATETIME)
+                VALUES (:postId, :userId, :content, NULL, NULL, GETDATE())
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()

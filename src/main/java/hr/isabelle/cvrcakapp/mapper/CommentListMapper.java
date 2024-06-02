@@ -17,7 +17,7 @@ public class CommentListMapper implements RowMapper<Comment> {
         comment.setContent(rs.getString("COMMENT_CONTENT"));
         comment.setUpdateDate(rs.getDate("UPDATE_DATETIME"));
         comment.setUpdateDate(rs.getDate("COMMENTING_DATETIME"));
-        //comment.setDeleteDate(rs.getDate("DELETE_DATETIME"));
+        comment.setDeleteDate(rs.getDate("DELETE_DATETIME"));
 
         return comment;
     }

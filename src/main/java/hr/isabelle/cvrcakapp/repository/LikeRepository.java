@@ -20,7 +20,7 @@ public class LikeRepository {
 
     public ServiceResultData like(LikeRequest request) {
         String sqlInsert = """
-                INSERT INTO POST_LIKE (POST_ID, USER_ID) VALUES (:postId, :userId)
+                INSERT INTO POST_LIKE (POST_ID, USER_ID, LIKE_TIMESTAMP) VALUES (:postId, :userId, GETDATE())
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()

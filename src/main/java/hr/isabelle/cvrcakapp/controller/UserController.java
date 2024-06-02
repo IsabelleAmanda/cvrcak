@@ -75,10 +75,10 @@ public class UserController {
     }
 
     // Endpoint to fetch comments on a specific post
-    @GetMapping("post/{postId}/comments")
+    /*@GetMapping("post/{postId}/comments")
     public List<Comment> getPostComments(@PathVariable int postId){
         return userService.getCommentsByPostId(postId);
-    }
+    }*/
 
     // Endpoint to fetch likes on a specific post
     @GetMapping("post/{postId}/likes")

@@ -50,7 +50,7 @@ public class UserRepository {
     private JdbcParameters findUserByUsername(String username) {
 
         String sqlQuery = """
-                    SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE FROM KORISNIK WHERE USERNAME = :username
+                    SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP FROM KORISNIK WHERE USERNAME = :username
                 """.stripIndent();
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("username", username);
@@ -69,8 +69,8 @@ public class UserRepository {
         }
 
         String sqlInsert = """
-                INSERT INTO KORISNIK(USERNAME, FIRST_NAME, LAST_NAME, PASSWORD, EMAIL, COUNTRY_ID, GENDER, BIRTHDAY, IMAGE, IS_DELETED)
-                VALUES(:username, :firstName, :lastName, :password, :email, 1, :gender, :birthday, :image, 0)
+                INSERT INTO KORISNIK(USERNAME, FIRST_NAME, LAST_NAME, PASSWORD, EMAIL, COUNTRY_ID, GENDER, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP, IS_DELETED)
+                VALUES(:username, :firstName, :lastName, :password, :email, 1, :gender, :birthday, :image, GETDATE(), 0)
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
@@ -112,7 +112,19 @@ public class UserRepository {
 
     public ServiceResultData deleteUser(NewUserRequest request) {
         String sqlUpdate = """
-                UPDATE KORISNIK SET IS_DELETED = 1 WHERE ID_USER = :userId
+                UPDATE KORISNIK
+                SET IS_DELETED = 1,
+                    USERNAME = 'user_' + CAST(
+                        (SELECT ISNULL(MAX(CAST(SUBSTRING(USERNAME, 6,1) AS INT)), 0) + 1
+                         FROM KORISNIK WHERE ISNUMERIC(SUBSTRING(USERNAME, 6, 1)) = 1) AS NVARCHAR(50)),
+                    FIRST_NAME = 'user',
+                    LAST_NAME = 'user',
+                    PASSWORD = 'password',
+                    EMAIL = 'user',
+                    GENDER = 'M',
+                    BIRTHDAY = '2000-01-01',
+                    IMAGE = NULL
+                WHERE ID_USER = :userId
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
@@ -189,14 +201,14 @@ public class UserRepository {
     }
 
     // Fetches comments on a specific post from the database
-    public List<Comment> getCommentsByPostId(int postId) {
+    /*public List<Comment> getCommentsByPostId(int postId) {
         String sqlQuery = """
             SELECT * FROM POST_COMMENT
             WHERE POST_ID = :postId
         """.stripIndent();
         SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("postId", postId);
         return namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new CommentListMapper());
-    }
+    }*/
 
     // Fetches likes on a specific post from the database
     public List<Like> getLikesByPostId(int postId) {
@@ -221,12 +233,14 @@ public class UserRepository {
     // Follows a user in the database
     public void followUser(int userId, int followerId) {
         String sqlInsert = """
-            INSERT INTO FOLLOW (FOLLOWING_USER_ID, FOLLOWED_USER_ID)
-            VALUES (:followerId, :userId)
+            INSERT INTO FOLLOW (FOLLOWING_USER_ID, FOLLOWED_USER_ID, FOLLOWING_TIMESTAMP)
+            VALUES (:followerId, :userId, GETADET())
         """.stripIndent();
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
                 .addValue("followerId", followerId)
                 .addValue("userId", userId);
+        //TODO: dodati insert u activity
+
         namedParameterJdbcTemplate.update(sqlInsert, sqlParameters);
     }
 

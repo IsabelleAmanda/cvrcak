@@ -62,9 +62,9 @@ public class UserService {
     }
 
     // Fetches comments on a specific post
-    public List<Comment> getCommentsByPostId(int postId) {
+    /*public List<Comment> getCommentsByPostId(int postId) {
         return userRepository.getCommentsByPostId(postId);
-    }
+    }*/
 
     // Fetches likes on a specific post
     public List<Like> getLikesByPostId(int postId) {
