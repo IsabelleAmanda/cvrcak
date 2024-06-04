@@ -10,11 +10,10 @@ public class LikeMapper implements RowMapper<Like> {
     @Override
     public Like mapRow(ResultSet rs, int rowNum) throws SQLException {
         Like like = new Like();
-        like.setLikeId(rs.getInt("like_id"));
+        like.setLikeId(rs.getInt("id_like"));
         like.setUserId(rs.getInt("user_id"));
         like.setPostId(rs.getInt("post_id"));
-        like.setLikingDate(rs.getDate("liking_date"));
-        like.setActivityId(rs.getInt("activity_id"));
+        like.setLikingDate(rs.getDate("like_timestamp"));
         return like;
     }
 }

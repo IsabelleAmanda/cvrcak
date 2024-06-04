@@ -32,14 +32,17 @@ public class LikeRepository {
     }
 
     //TODO: ZAS OVO NE RADI? I KAK NAPRAVIT DA RADI?
+    // Radi - Mika
+    // Update: ja sam promjenio da trazi po postId i userId zbog jednostavnosti
     @Transactional
     public ServiceResultData unlike(LikeRequest request) {
         String sqlDelete = """
-                DELETE FROM POST_LIKE WHERE ID_LIKE = :likeId
+                DELETE FROM POST_LIKE WHERE POST_ID = :post_id AND USER_ID = :user_id
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
-                .addValue("likeId", request.likeId);
+                .addValue("post_id", request.postId)
+                .addValue("user_id", request.userId);
 
         namedParameterJdbcTemplate.update(sqlDelete, sqlParameters);
         return new ServiceResultData(true, request.likeId);

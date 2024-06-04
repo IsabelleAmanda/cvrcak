@@ -32,15 +32,21 @@ public class UserRepository {
     }
 
     public User getUserByUsername(String username){
-        try{
+        try {
             JdbcParameters jdbcParameters = findUserByUsername(username);
 
-            User user = namedParameterJdbcTemplate.queryForObject(
+            List<User> users = namedParameterJdbcTemplate.query(
                     jdbcParameters.sqlQuery,
                     jdbcParameters.sqlParameters,
                     new UserMapper());
 
-            return user;
+            if(users.isEmpty()) {
+                return null;
+            } else if (users.size() == 1) {
+                return users.getFirst();
+            } else { // List has more than 1 user with the same username
+                return null;
+            }
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e);

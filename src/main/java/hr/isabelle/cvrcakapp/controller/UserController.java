@@ -39,7 +39,7 @@ public class UserController {
         return userService.updateUser(request);
     }
 
-    @PutMapping(value = "user/delete")
+    @DeleteMapping(value = "user/delete")
     public ServiceResultData deleteUser(@RequestBody @Validated NewUserRequest request){
         return userService.deleteUser(request);
     }

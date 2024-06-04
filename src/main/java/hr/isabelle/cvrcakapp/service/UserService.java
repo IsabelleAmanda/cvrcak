@@ -26,7 +26,7 @@ public class UserService {
     }
 
     public ServiceResultData registerUser(NewUserRequest request) {
-        return new ServiceResultData(true, this.userRepository.registerUser(request));
+        return this.userRepository.registerUser(request);
     }
 
     public ServiceResultData updateUser(NewUserRequest request) {

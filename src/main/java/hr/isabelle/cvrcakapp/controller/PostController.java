@@ -49,7 +49,7 @@ public class PostController {
         return postService.updatePost(request);
     }
 
-    @PutMapping(value = "post/delete")
+    @DeleteMapping(value = "post/delete")
     public ServiceResultData deletePost(@RequestBody @Validated PostRequest request){
         return postService.deletePost(request);
     }

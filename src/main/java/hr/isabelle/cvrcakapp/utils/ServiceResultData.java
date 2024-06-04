@@ -1,16 +1,13 @@
 package hr.isabelle.cvrcakapp.utils;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@JsonIgnoreProperties("class")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class ServiceResultData {
-    Boolean success;
-    Object result;
-
-    ServiceResultData(){}
-    public ServiceResultData(Boolean success, Object result){
-        this.success = success;
-        this.result = result;
-    }
-
+    private boolean success;
+    private Object result;
 }
