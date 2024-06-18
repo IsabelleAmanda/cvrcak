@@ -1,9 +1,8 @@
 package hr.isabelle.cvrcakapp.model.request;
 
-import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Validated
 public class PostRequest {
@@ -15,7 +14,7 @@ public class PostRequest {
     public Boolean isPublic;
     public Boolean isPermanent;
     public Boolean isDeleted;
-    public DateTimeLiteralExpression.DateTime disappearTime;
+    public LocalDateTime disappearTime;
 
     /*@Override
     public String toString() {

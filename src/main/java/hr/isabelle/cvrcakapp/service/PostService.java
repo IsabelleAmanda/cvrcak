@@ -1,13 +1,11 @@
 package hr.isabelle.cvrcakapp.service;
 
 import hr.isabelle.cvrcakapp.model.Comment;
+import hr.isabelle.cvrcakapp.model.Like;
 import hr.isabelle.cvrcakapp.model.Post;
-import hr.isabelle.cvrcakapp.model.request.NewUserRequest;
 import hr.isabelle.cvrcakapp.model.request.PostRequest;
 import hr.isabelle.cvrcakapp.repository.PostRepository;
-import hr.isabelle.cvrcakapp.repository.UserRepository;
 import hr.isabelle.cvrcakapp.utils.ServiceResultData;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +30,11 @@ public class PostService {
         return this.postRepository.getComments(postId);
     }
 
+    // Fetches likes on a specific post
+    public List<Like> getLikesByPostId(int postId) {
+        return postRepository.getLikesByPostId(postId);
+    }
+
     public Integer newPost(PostRequest request) {
         return postRepository.newPost(request);
     }
@@ -40,7 +43,12 @@ public class PostService {
         return this.postRepository.updatePost(request);
     }
 
-    public ServiceResultData deletePost(PostRequest request) {
-        return this.postRepository.deletePost(request);
+    public ServiceResultData deletePost(Integer postId) {
+        return this.postRepository.deletePost(postId);
+    }
+
+    public int getLikesCount(Integer postId) {
+        return postRepository.getLikesCountByPostId(postId);
+
     }
 }

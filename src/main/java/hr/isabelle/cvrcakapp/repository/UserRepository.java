@@ -1,19 +1,12 @@
 package hr.isabelle.cvrcakapp.repository;
 
-import hr.isabelle.cvrcakapp.mapper.CommentListMapper;
-import hr.isabelle.cvrcakapp.mapper.LikeMapper;
 import hr.isabelle.cvrcakapp.mapper.PostListMapper;
 import hr.isabelle.cvrcakapp.mapper.UserMapper;
-import hr.isabelle.cvrcakapp.model.Comment;
-import hr.isabelle.cvrcakapp.model.Like;
 import hr.isabelle.cvrcakapp.model.Post;
 import hr.isabelle.cvrcakapp.model.User;
-import hr.isabelle.cvrcakapp.model.request.NewConversationRequest;
-import hr.isabelle.cvrcakapp.model.request.NewMessageRequest;
 import hr.isabelle.cvrcakapp.model.request.NewUserRequest;
 import hr.isabelle.cvrcakapp.utils.JdbcParameters;
 import hr.isabelle.cvrcakapp.utils.ServiceResultData;
-import net.sf.jsqlparser.expression.JdbcParameter;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -44,7 +37,7 @@ public class UserRepository {
                 return null;
             } else if (users.size() == 1) {
                 return users.getFirst();
-            } else { // List has more than 1 user with the same username
+            } else {
                 return null;
             }
         }
@@ -64,7 +57,6 @@ public class UserRepository {
     }
 
     public ServiceResultData registerUser(NewUserRequest request) {
-        // Check if the username or email already exists
         String checkUserSql = "SELECT COUNT(*) FROM KORISNIK WHERE USERNAME = :username OR EMAIL = :email";
         SqlParameterSource checkUserParams = new MapSqlParameterSource()
                 .addValue("username", request.username)
@@ -94,29 +86,34 @@ public class UserRepository {
     }
 
     public ServiceResultData updateUser(NewUserRequest request) {
-        String sqlUpdate = """
+        StringBuilder sqlUpdate = new StringBuilder("""
                 UPDATE KORISNIK
                 SET USERNAME = :username, FIRST_NAME = :firstName, LAST_NAME = :lastName,
-                PASSWORD = :password, EMAIL = :email, GENDER = :gender, BIRTHDAY = :birthday, IMAGE = :image
-                WHERE ID_USER = :userId
-                """.stripIndent();
+                EMAIL = :email, GENDER = :gender, BIRTHDAY = :birthday, IMAGE = :image
+                """);
 
-        SqlParameterSource sqlParameters = new MapSqlParameterSource()
+        MapSqlParameterSource sqlParameters = new MapSqlParameterSource()
                 .addValue("userId", request.userId)
                 .addValue("username", request.username)
                 .addValue("firstName", request.firstName)
                 .addValue("lastName", request.lastName)
-                .addValue("password", request.password)
                 .addValue("email", request.email)
                 .addValue("gender", request.gender)
                 .addValue("birthday", request.birthday)
                 .addValue("image", request.image);
 
-        namedParameterJdbcTemplate.update(sqlUpdate, sqlParameters);
+        if (request.password != null) {
+            sqlUpdate.append(", PASSWORD = :password");
+            sqlParameters.addValue("password", request.password);
+        }
+
+        sqlUpdate.append(" WHERE ID_USER = :userId");
+
+        namedParameterJdbcTemplate.update(sqlUpdate.toString(), sqlParameters);
         return new ServiceResultData(true, request.userId);
     }
 
-    public ServiceResultData deleteUser(NewUserRequest request) {
+    public ServiceResultData deleteUser(Integer userId) {
         String sqlUpdate = """
                 UPDATE KORISNIK
                 SET IS_DELETED = 1,
@@ -134,10 +131,10 @@ public class UserRepository {
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
-                .addValue("userId", request.userId);
+                .addValue("userId", userId);
 
         namedParameterJdbcTemplate.update(sqlUpdate, sqlParameters);
-        return new ServiceResultData(true, request.userId);
+        return new ServiceResultData(true, userId);
     }
     public List<User> getUsersByName(String name) {
         String sqlQuery = """
@@ -162,15 +159,15 @@ public class UserRepository {
     }
 
     public List<User> getFollowers(int userId, int page) {
-        int limit = 100;
+        int limit = 50;
         int offset = (page - 1) * limit;
         String sqlQuery = """
-            SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE
-            FROM KORISNIK
-            WHERE ID_USER IN (SELECT FOLLOWING_USER_ID FROM FOLLOW WHERE FOLLOWED_USER_ID = :userId)
-            ORDER BY USERNAME
-            OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY
-        """.stripIndent();
+                    SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP, GENDER
+                    FROM KORISNIK
+                    WHERE ID_USER IN (SELECT FOLLOWING_USER_ID FROM FOLLOW WHERE FOLLOWED_USER_ID = :userId)
+                    ORDER BY USERNAME
+                    OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY
+                """.stripIndent();
         SqlParameterSource parameterSource = new MapSqlParameterSource()
                 .addValue("userId", userId)
                 .addValue("limit", limit)
@@ -179,10 +176,10 @@ public class UserRepository {
     }
 
     public List<User> getFollowing(int userId, int page) {
-        int limit = 100;
+        int limit = 50;
         int offset = (page - 1) * limit;
         String sqlQuery = """
-            SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE
+                    SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP
             FROM KORISNIK
             WHERE ID_USER IN (SELECT FOLLOWED_USER_ID FROM FOLLOW WHERE FOLLOWING_USER_ID = :userId)
             ORDER BY USERNAME
@@ -216,15 +213,7 @@ public class UserRepository {
         return namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new CommentListMapper());
     }*/
 
-    // Fetches likes on a specific post from the database
-    public List<Like> getLikesByPostId(int postId) {
-        String sqlQuery = """
-            SELECT * FROM POST_LIKE
-            WHERE POST_ID = :postId
-        """.stripIndent();
-        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("postId", postId);
-        return namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new LikeMapper());
-    }
+
 
     // Fetches posts that a specific user has liked from the database
     public List<Post> getPostsLikedByUserId(int userId) {
@@ -239,26 +228,46 @@ public class UserRepository {
     // Follows a user in the database
     public void followUser(int userId, int followerId) {
         String sqlInsert = """
-            INSERT INTO FOLLOW (FOLLOWING_USER_ID, FOLLOWED_USER_ID, FOLLOWING_TIMESTAMP)
-            VALUES (:followerId, :userId, GETADET())
-        """.stripIndent();
+                    INSERT INTO FOLLOW (FOLLOWING_USER_ID, FOLLOWED_USER_ID)
+                    VALUES (:followerId, :userId)
+                """.stripIndent();
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
                 .addValue("followerId", followerId)
                 .addValue("userId", userId);
-        //TODO: dodati insert u activity
-
         namedParameterJdbcTemplate.update(sqlInsert, sqlParameters);
     }
+    //TODO: dodati insert u activity
 
     // Unfollows a user in the database
     public void unfollowUser(int userId, int followerId) {
         String sqlDelete = """
-            DELETE FROM FOLLOW
-            WHERE FOLLOWING_USER_ID = :followerId AND FOLLOWED_USER_ID = :userId
-        """.stripIndent();
+                    DELETE FROM FOLLOW
+                    WHERE FOLLOWING_USER_ID = :followerId AND FOLLOWED_USER_ID = :userId
+                """.stripIndent();
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
                 .addValue("followerId", followerId)
                 .addValue("userId", userId);
         namedParameterJdbcTemplate.update(sqlDelete, sqlParameters);
+    }
+
+    public User getUserById(int userId) {
+        String sqlQuery = """
+                    SELECT * FROM KORISNIK
+                    WHERE ID_USER = :userId
+                """.stripIndent();
+        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("userId", userId);
+        return namedParameterJdbcTemplate.queryForObject(sqlQuery, parameterSource, new UserMapper());
+    }
+
+    public boolean isFollowing(int userId, int followerId) {
+        String sqlQuery = """
+                    SELECT COUNT(*) FROM FOLLOW
+                    WHERE FOLLOWING_USER_ID = :followerId AND FOLLOWED_USER_ID = :userId
+                """.stripIndent();
+        SqlParameterSource sqlParameters = new MapSqlParameterSource()
+                .addValue("followerId", followerId)
+                .addValue("userId", userId);
+        Integer count = namedParameterJdbcTemplate.queryForObject(sqlQuery, sqlParameters, Integer.class);
+        return count != null && count > 0;
     }
 }

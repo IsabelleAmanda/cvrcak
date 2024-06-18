@@ -14,11 +14,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Post {
+    Integer userId;
     Integer postId;
     String title;
     String content;
     String image;   //razmislit o Image image??? ili nes slicno tome
-    Timestamp postingDate;
+    Date postingDate;
     Date updateDate;
     Date deleteDate;
     Boolean isPublic;

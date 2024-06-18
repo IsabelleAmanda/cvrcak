@@ -1,6 +1,7 @@
 package hr.isabelle.cvrcakapp.controller;
 
 import hr.isabelle.cvrcakapp.model.Comment;
+import hr.isabelle.cvrcakapp.model.Like;
 import hr.isabelle.cvrcakapp.model.Post;
 import hr.isabelle.cvrcakapp.model.request.NewUserRequest;
 import hr.isabelle.cvrcakapp.model.request.PostRequest;
@@ -34,10 +35,24 @@ public class PostController {
         return postService.getCommentsCount(postId);
     }
 
+    @RequestMapping(value = "/post/likesCount/{postId}", method = RequestMethod.GET)
+    public Integer getLikesCount(@PathVariable Integer postId) {
+        return postService.getLikesCount(postId);
+    }
+
+
+    // Endpoint to fetch likes on a specific post
+    @GetMapping("post/{postId}/likes")
+    public List<Like> getPostLikes(@PathVariable int postId) {
+        return postService.getLikesByPostId(postId);
+    }
+
+
     @RequestMapping(value = "/post/comments/{postId}", method = RequestMethod.GET)
     public List<Comment> getComments(@PathVariable Integer postId){
         return postService.getComments(postId);
     }
+
 
     @RequestMapping(value = "post/newPost", method = RequestMethod.POST)
     public Integer postNewPost(@RequestBody @Validated PostRequest request){
@@ -49,9 +64,8 @@ public class PostController {
         return postService.updatePost(request);
     }
 
-    @DeleteMapping(value = "post/delete")
-    public ServiceResultData deletePost(@RequestBody @Validated PostRequest request){
-        return postService.deletePost(request);
+    @DeleteMapping(value = "post/delete/{postId}")
+    public ServiceResultData deletePost(@PathVariable Integer postId) {
+        return postService.deletePost(postId);
     }
-
 }

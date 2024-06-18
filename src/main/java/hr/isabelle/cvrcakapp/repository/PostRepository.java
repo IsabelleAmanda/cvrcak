@@ -1,10 +1,9 @@
 package hr.isabelle.cvrcakapp.repository;
 
-import hr.isabelle.cvrcakapp.mapper.UserMapper;
+import hr.isabelle.cvrcakapp.mapper.LikeMapper;
 import hr.isabelle.cvrcakapp.model.Comment;
+import hr.isabelle.cvrcakapp.model.Like;
 import hr.isabelle.cvrcakapp.model.Post;
-import hr.isabelle.cvrcakapp.model.User;
-import hr.isabelle.cvrcakapp.model.request.NewUserRequest;
 import hr.isabelle.cvrcakapp.model.request.PostRequest;
 import hr.isabelle.cvrcakapp.utils.JdbcParameters;
 import hr.isabelle.cvrcakapp.utils.ServiceResultData;
@@ -27,12 +26,12 @@ public class PostRepository {
 
     public List<Post> getAllPosts(){
         try{
-        JdbcParameters jdbcParameters = sqlAllPosts();
+            JdbcParameters jdbcParameters = sqlAllPosts();
 
-           List<Post> posts = namedParameterJdbcTemplate.query(jdbcParameters.sqlQuery,
+            List<Post> posts = namedParameterJdbcTemplate.query(jdbcParameters.sqlQuery,
                     jdbcParameters.sqlParameters,
                     new hr.isabelle.cvrcakapp.mapper.PostListMapper());
-           return posts;
+            return posts;
         }
         catch (DataAccessException e) {
             throw new RuntimeException(e);
@@ -96,6 +95,15 @@ public class PostRepository {
         return new JdbcParameters(sqlQuery, sqlParameterSource);
     }
 
+    // Fetches likes on a specific post from the database
+    public List<Like> getLikesByPostId(int postId) {
+        String sqlQuery = """
+                    SELECT * FROM POST_LIKE
+                    WHERE POST_ID = :postId
+                """.stripIndent();
+        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("postId", postId);
+        return namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new LikeMapper());
+    }
 
     /*private JdbcParameters findUserByUsername(String username) {
 
@@ -133,25 +141,31 @@ public class PostRepository {
                 WHERE ID_POST = :postId
                 """.stripIndent();
 
-                SqlParameterSource sqlParameters = new MapSqlParameterSource()
-                        .addValue("postId", request.postId)
-                        .addValue("title", request.title)
-                        .addValue("content", request.content)
-                        .addValue("image", request.image);
+        SqlParameterSource sqlParameters = new MapSqlParameterSource()
+                .addValue("postId", request.postId)
+                .addValue("title", request.title)
+                .addValue("content", request.content)
+                .addValue("image", request.image);
 
         namedParameterJdbcTemplate.update(sqlUpdate, sqlParameters);
         return new ServiceResultData(true, request.postId);
     }
 
-    public ServiceResultData deletePost(PostRequest request) {
+    public ServiceResultData deletePost(Integer postId) {
         String sqlUpdate = """
                 UPDATE POST SET IS_DELETED = 1, DELETE_DATETIME = GETDATE() WHERE ID_POST = :postId
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
-                .addValue("postId", request.postId);
+                .addValue("postId", postId);
 
         namedParameterJdbcTemplate.update(sqlUpdate, sqlParameters);
-        return new ServiceResultData(true, request.postId);
+        return new ServiceResultData(true, postId);
+    }
+
+    public int getLikesCountByPostId(int postId) {
+        String sql = "SELECT COUNT(*) FROM POST_LIKE WHERE POST_ID = :postId";
+        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("postId", postId);
+        return namedParameterJdbcTemplate.queryForObject(sql, parameterSource, Integer.class);
     }
 }

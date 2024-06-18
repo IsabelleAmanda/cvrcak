@@ -2,26 +2,29 @@ package hr.isabelle.cvrcakapp.model.request;
 
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.Pattern;
+import javax.validation.constraints.*;
 import java.util.Date;
 
 @Validated
 public class NewUserRequest {
     public Integer userId;
+    @NotBlank(message = "Username cannot be blank")
     public String username;
+    @NotBlank(message = "First name cannot be blank")
     public String firstName;
+    @NotBlank(message = "Last name cannot be blank")
     public String lastName;
-
-    //TODO: validacija za password - duzina npr
+    @NotBlank(message = "Password cannot be blank")
+    @Size(min = 8, message = "Password must be at least 8 characters long")
     public String password;
-
-    //TODO: validacija za mail - regex
+    @NotBlank(message = "Email cannot be blank")
+    @Email(message = "Email should be valid")
     public String email;
     public String country;
-
-    //TODO: dodati custom validaciju da moze biti samo F ili M!
+    @NotBlank(message = "Gender cannot be blank")
+    @Pattern(regexp = "^[MF]$", message = "Gender can only be 'M' or 'F'")
     public String gender;
-    //TODO: validacija za format datuma - regex
+    @NotNull(message = "Birthday cannot be null")
     public Date birthday;
     public String image;
 

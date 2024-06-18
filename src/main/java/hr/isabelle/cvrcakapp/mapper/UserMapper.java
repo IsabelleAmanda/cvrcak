@@ -21,7 +21,8 @@ public class UserMapper implements RowMapper<User> {
         user.setBirthday(rs.getDate("BIRTHDAY"));
         user.setImage(rs.getString("IMAGE"));
         user.setRegisterDate(rs.getDate("REGISTER_TIMESTAMP"));
-        //user.setIsDeleted(rs.getBoolean("IS_DELETED"));
+        user.setGender(rs.getString("GENDER").charAt(0));
+
         //user.setCountry(rs.getString("COUNTRY"));
 
         return user;
