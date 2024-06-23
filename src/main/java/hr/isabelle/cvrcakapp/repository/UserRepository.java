@@ -49,7 +49,8 @@ public class UserRepository {
     private JdbcParameters findUserByUsername(String username) {
 
         String sqlQuery = """
-                    SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP FROM KORISNIK WHERE USERNAME = :username
+                    SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, PASSWORD,
+                    EMAIL, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP, GENDER FROM KORISNIK WHERE USERNAME = :username
                 """.stripIndent();
         MapSqlParameterSource parameterSource = new MapSqlParameterSource();
         parameterSource.addValue("username", username);
