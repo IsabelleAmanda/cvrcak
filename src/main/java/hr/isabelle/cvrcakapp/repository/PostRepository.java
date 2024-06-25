@@ -105,16 +105,6 @@ public class PostRepository {
         return namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new LikeMapper());
     }
 
-    /*private JdbcParameters findUserByUsername(String username) {
-
-        String sqlQuery = """
-                    SELECT USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE FROM KORISNIK WHERE USERNAME = :username
-                """.stripIndent();
-        MapSqlParameterSource parameterSource = new MapSqlParameterSource();
-        parameterSource.addValue("username", username);
-        return new JdbcParameters(sqlQuery, parameterSource);
-    }*/
-
     public Integer newPost(PostRequest request) {
         String sqlInsert = """
                 INSERT INTO POST (USER_ID, POST_TITLE, POST_CONTENT, POSTING_DATETIME, IMAGE, IS_PUBLIC, IS_PERMANENT, DISAPEAR_DATETIME)

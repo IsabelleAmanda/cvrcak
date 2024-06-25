@@ -15,6 +15,8 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import javax.xml.transform.Result;
 
+import java.util.Random;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,6 +26,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class CvrcakUserTests {
     @Autowired
     private MockMvc mockMvc;
+    private static final Random random = new Random();
+
+    private static String token;
 
     @Test
     @Order(1)
@@ -33,8 +38,8 @@ public class CvrcakUserTests {
                 "    \"username\": \"peroperic123\",\n" +
                 "    \"firstName\": \"Pero\",\n" +
                 "    \"lastName\": \"Peric\",\n" +
-                "    \"password\": \"thishastobeencoded\",\n" +
-                "    \"email\": \"pero.peric@email.com\",\n" +
+                "    \"password\": \"password\",\n" +
+                "    \"email\": \"pero.peric" + random.nextInt() + "@email.com\",\n" +
                 "    \"country\": \"Slovenia\",\n" +
                 "    \"gender\": \"M\",\n" +
                 "    \"birthday\": \"2003-01-02\",\n" +
@@ -43,35 +48,53 @@ public class CvrcakUserTests {
                 "}";
 
         // Act
-        ResultActions result = mockMvc.perform(post("/cvrcak/user/register")
+        ResultActions result = mockMvc.perform(post("/cvrcak/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json));
 
         // Assert
-        // String address = "http://localhost/cvrcak/user/peroperic123";
-
         result.andExpect(status().isOk());
+
+        token = getToken("peroperic123", "password");
+        // System.out.println(token);
     }
 
     @Test
     @Order(2)
     void testGetUser() throws Exception {
         // Arrange
-        String username = "john_doe";
+        String username = "peroperic123";
 
         // Act
-        ResultActions result = mockMvc.perform(get("/cvrcak/user/{username}", username));
+        ResultActions result = mockMvc.perform(get("/cvrcak/user/{username}", username)
+                .header("Authorization", "Bearer " + token));
 
         // Assert
         result.andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.username").value(username))
-                .andExpect(jsonPath("$.firstName").value("John"))
-                .andExpect(jsonPath("$.lastName").value("Doe"));
+                .andExpect(jsonPath("$.firstName").value("Pero"))
+                .andExpect(jsonPath("$.lastName").value("Peric"));
+    }
+
+    private String getToken(String username, String password) throws Exception {
+        final String loginBody = "{" +
+                "\"username\": \"" + username + "\",\n" +
+                "\"password\": \"" + password + "\"\n" +
+                "}";
+
+        ResultActions loginResult = mockMvc.perform(post("/cvrcak/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(loginBody));
+
+        MvcResult mvcResult = loginResult.andReturn();
+        return JsonPath.read(mvcResult.getResponse().getContentAsString(), "$.token");
     }
 
     private int getUserId(String username) throws Exception {
-        ResultActions result = mockMvc.perform(get("/cvrcak/user/{username}", username));
+        ResultActions result = mockMvc.perform(get("/cvrcak/user/{username}", username)
+                                .header("Authorization", "Bearer " + token));
 
         MvcResult mvcResult = result.andReturn();
         int id = JsonPath.read(mvcResult.getResponse().getContentAsString(), "$.userId");
@@ -83,7 +106,8 @@ public class CvrcakUserTests {
     @Order(3)
     void testUpdateUser() throws Exception {
         // Arrange
-        int oldId = getUserId("peroperic123");
+        String oldUsername = "peroperic123";
+        int oldId = getUserId(oldUsername);
         String newUsername = "anaanic123";
 
         String json = "{\n" +
@@ -91,7 +115,7 @@ public class CvrcakUserTests {
                 "    \"username\": \"" + newUsername + "\",\n" +
                 "    \"firstName\": \"Ana\",\n" +
                 "    \"lastName\": \"Anic\",\n" +
-                "    \"password\": \"thishastobeencoded\",\n" +
+                "    \"password\": \"password\",\n" +
                 "    \"email\": \"ana.anic@email.com\",\n" +
                 "    \"country\": \"Croatia\",\n" +
                 "    \"gender\": \"F\",\n" +
@@ -104,9 +128,13 @@ public class CvrcakUserTests {
         ResultActions result = mockMvc.perform(put("/cvrcak/user/update")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
                 .content(json));
 
-        ResultActions updatedUserResult = mockMvc.perform(get("/cvrcak/user/{username}", newUsername));
+        token = getToken(newUsername, "password");
+
+        ResultActions updatedUserResult = mockMvc.perform(get("/cvrcak/user/{username}", newUsername)
+                .header("Authorization", "Bearer " + token));
 
         // Assert
         updatedUserResult.andExpect(status().isOk())
@@ -121,12 +149,11 @@ public class CvrcakUserTests {
     void testDeleteUser() throws Exception {
         // Arrange
         int id = getUserId("anaanic123");
-        String json = "{\"userId\":" + id + "}";
 
         // Act
-        ResultActions result = mockMvc.perform(delete("/cvrcak/user/delete")
+        ResultActions result = mockMvc.perform(delete("/cvrcak/user/delete/id/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(json));
+                .header("Authorization", "Bearer " + token));
 
         // Assert
         result.andExpect(status().isOk());

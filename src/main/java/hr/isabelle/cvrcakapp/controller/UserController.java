@@ -33,16 +33,10 @@ public class UserController {
         return userService.getUserByUsername(username);
     }
 
-    @RequestMapping(value = "user/register", method = RequestMethod.POST)
-    public ServiceResultData registerUser(@RequestBody @Validated NewUserRequest request){
-        return userService.registerUser(request);
-    }
-
     @PutMapping(value = "user/update")
     public ServiceResultData updateUser(@RequestBody @Validated NewUserRequest request){
         return userService.updateUser(request);
     }
-
 
     @DeleteMapping(value = "user/delete/id/{id}")
     public ServiceResultData deleteUser(@PathVariable Integer id) {
@@ -64,12 +58,12 @@ public class UserController {
     }
 
     @GetMapping("user/{userId}/following/{page}")
-    public List<User> getFollowers(@PathVariable int userId, @PathVariable int page){
+    public List<User> getFollowers(@PathVariable int userId, @PathVariable int page) {
         return userService.getFollowers(userId, page);
     }
 
     @GetMapping("user/{userId}/followers/{page}")
-    public List<User> getFollowing(@PathVariable int userId, @PathVariable int page){
+    public List<User> getFollowing(@PathVariable int userId, @PathVariable int page) {
         return userService.getFollowing(userId, page);
     }
     // Endpoint to fetch posts made by a specific user

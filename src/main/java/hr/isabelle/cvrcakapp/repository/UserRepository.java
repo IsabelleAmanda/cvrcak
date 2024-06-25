@@ -11,13 +11,15 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class UserRepository {
-
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public UserRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate){
@@ -105,6 +107,7 @@ public class UserRepository {
 
         if (request.password != null) {
             sqlUpdate.append(", PASSWORD = :password");
+            request.password = passwordEncoder.encode(request.password);
             sqlParameters.addValue("password", request.password);
         }
 
@@ -163,7 +166,7 @@ public class UserRepository {
         int limit = 50;
         int offset = (page - 1) * limit;
         String sqlQuery = """
-                    SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP, GENDER
+                    SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, PASSWORD, EMAIL, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP, GENDER
                     FROM KORISNIK
                     WHERE ID_USER IN (SELECT FOLLOWING_USER_ID FROM FOLLOW WHERE FOLLOWED_USER_ID = :userId)
                     ORDER BY USERNAME
@@ -173,6 +176,7 @@ public class UserRepository {
                 .addValue("userId", userId)
                 .addValue("limit", limit)
                 .addValue("offset", offset);
+
         return namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new UserMapper());
     }
 
@@ -180,7 +184,7 @@ public class UserRepository {
         int limit = 50;
         int offset = (page - 1) * limit;
         String sqlQuery = """
-                    SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP
+            SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, PASSWORD, EMAIL, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP
             FROM KORISNIK
             WHERE ID_USER IN (SELECT FOLLOWED_USER_ID FROM FOLLOW WHERE FOLLOWING_USER_ID = :userId)
             ORDER BY USERNAME
@@ -190,6 +194,7 @@ public class UserRepository {
                 .addValue("userId", userId)
                 .addValue("limit", limit)
                 .addValue("offset", offset);
+
         return namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new UserMapper());
     }
 

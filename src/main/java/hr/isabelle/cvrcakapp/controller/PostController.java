@@ -40,22 +40,19 @@ public class PostController {
         return postService.getLikesCount(postId);
     }
 
-
     // Endpoint to fetch likes on a specific post
     @GetMapping("post/{postId}/likes")
     public List<Like> getPostLikes(@PathVariable int postId) {
         return postService.getLikesByPostId(postId);
     }
 
-
     @RequestMapping(value = "/post/comments/{postId}", method = RequestMethod.GET)
     public List<Comment> getComments(@PathVariable Integer postId){
         return postService.getComments(postId);
     }
 
-
     @RequestMapping(value = "post/newPost", method = RequestMethod.POST)
-    public Integer postNewPost(@RequestBody @Validated PostRequest request){
+    public Integer postNewPost(@RequestBody @Validated PostRequest request) {
         return postService.newPost(request);
     }
 
