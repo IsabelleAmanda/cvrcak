@@ -17,8 +17,8 @@ public class ConversationService {
         this.conversationRepository = conversationRepository;
     }
 
-    public ServiceResultData addNewMessage(NewMessageRequest request) {
-        return this.conversationRepository.addNewMessage(request);
+    public ServiceResultData sendMessage(NewMessageRequest request) {
+        return this.conversationRepository.sendMessage(request);
     }
 
     public ServiceResultData addNewConversation(NewConversationRequest request, Integer senderId, Integer receiverId) {

@@ -1,7 +1,10 @@
 package hr.isabelle.cvrcakapp.repository;
 
+import hr.isabelle.cvrcakapp.mapper.MessageMapper;
 import hr.isabelle.cvrcakapp.mapper.PostListMapper;
 import hr.isabelle.cvrcakapp.mapper.UserMapper;
+import hr.isabelle.cvrcakapp.model.Conversation;
+import hr.isabelle.cvrcakapp.model.Message;
 import hr.isabelle.cvrcakapp.model.Post;
 import hr.isabelle.cvrcakapp.model.User;
 import hr.isabelle.cvrcakapp.model.request.NewUserRequest;
@@ -15,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -275,5 +279,58 @@ public class UserRepository {
                 .addValue("userId", userId);
         Integer count = namedParameterJdbcTemplate.queryForObject(sqlQuery, sqlParameters, Integer.class);
         return count != null && count > 0;
+    }
+
+    public List<Conversation> getUserConversations(int id) {
+        String sqlQuery = """
+                SELECT * FROM MESSAGE
+                WHERE SENDER_ID = :id OR RECEIVER_ID = :id
+                """;
+
+        SqlParameterSource sqlParams = new MapSqlParameterSource()
+                .addValue("id", id);
+
+        List<Message> messagesResult = namedParameterJdbcTemplate.query(sqlQuery, sqlParams, new MessageMapper());
+        List<Message> messages = new ArrayList<>(messagesResult);
+
+        List<Conversation> conversations = new ArrayList<>();
+
+        int idCounter = 0;
+
+        for (Message message : messages) {
+            if (conversations.isEmpty()) {
+                Conversation convo = new Conversation();
+
+                convo.setId(idCounter++);
+                convo.addParticipants(message.getSenderId(), message.getReceiverId());
+
+                conversations.add(convo);
+            }
+
+            boolean convoMatch = false;
+            for (Conversation c: conversations) {
+                boolean correctConversation =
+                        c.getParticipants().contains(message.getSenderId())
+                     && c.getParticipants().contains(message.getReceiverId());
+
+                if(correctConversation) {
+                    c.addMessage(message);
+                    convoMatch = true;
+                    break;
+                }
+            }
+
+            if(!convoMatch) {
+                Conversation conversation = new Conversation();
+
+                conversation.setId(idCounter++);
+                conversation.addParticipants(message.getSenderId(), message.getReceiverId());
+                conversation.addMessage(message);
+
+                conversations.add(conversation);
+            }
+        }
+
+        return conversations;
     }
 }

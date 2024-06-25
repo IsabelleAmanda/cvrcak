@@ -8,7 +8,7 @@ public class NewMessageRequest {
     public Integer messageId;
     public Integer senderId;
     public Integer receiverId;
-    @Pattern(regexp = "^.{0,160}$", message = "Too long message")
+    @Pattern(regexp = "^.{0,160}$", message = "The message is too long")
     public String messageContent;
 
     String sendTime;

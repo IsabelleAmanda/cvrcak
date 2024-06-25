@@ -22,10 +22,10 @@ public class ConversationRepository {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    public ServiceResultData addNewMessage(NewMessageRequest request) {
+    public ServiceResultData sendMessage(NewMessageRequest request) {
         String sqlInsert = """
                 INSERT INTO MESSAGE(SENDER_ID, RECEIVER_ID, MESSAGE_CONTENT, MESSAGE_TIMESTAMP)
-                VALUES(:senderId, :receiverId, :messageContent, GETDATE())
+                VALUES(:senderId, :receiverId, :messageContent, getdate())
                 """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()

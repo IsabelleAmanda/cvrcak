@@ -1,12 +1,18 @@
 package hr.isabelle.cvrcakapp.model;
 
-import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Message {
     Integer id;
-    Integer senderId; //ili cijeli user?
+    Integer senderId;
     Integer receiverId;
-    String messageContent;
-    DateTimeLiteralExpression.DateTime sendDate;
-
+    String content;
+    Date sendDate;
 }

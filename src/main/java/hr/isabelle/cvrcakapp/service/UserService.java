@@ -1,11 +1,13 @@
 package hr.isabelle.cvrcakapp.service;
 
+import hr.isabelle.cvrcakapp.model.Conversation;
 import hr.isabelle.cvrcakapp.model.Post;
 import hr.isabelle.cvrcakapp.model.User;
 import hr.isabelle.cvrcakapp.model.request.NewUserRequest;
 import hr.isabelle.cvrcakapp.repository.UserRepository;
 import hr.isabelle.cvrcakapp.utils.ServiceResultData;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -81,4 +83,6 @@ public class UserService {
     public User getUserById(int userId) {
         return userRepository.getUserById(userId);
     }
+
+    public List<Conversation> getUserConversations(int id) { return userRepository.getUserConversations(id); }
 }

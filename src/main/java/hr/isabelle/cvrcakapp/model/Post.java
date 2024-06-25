@@ -1,12 +1,10 @@
 package hr.isabelle.cvrcakapp.model;
 
-import ch.qos.logback.core.joran.action.TimestampAction;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.List;
 

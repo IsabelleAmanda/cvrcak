@@ -1,5 +1,7 @@
 package hr.isabelle.cvrcakapp.controller;
 
+import hr.isabelle.cvrcakapp.model.Conversation;
+import hr.isabelle.cvrcakapp.model.Message;
 import hr.isabelle.cvrcakapp.model.Post;
 import hr.isabelle.cvrcakapp.model.User;
 import hr.isabelle.cvrcakapp.model.request.NewUserRequest;
@@ -8,6 +10,8 @@ import hr.isabelle.cvrcakapp.utils.ServiceResultData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -79,7 +83,7 @@ public class UserController {
         return userService.getPostsLikedByUserId(userId);
     }
 
-    //Follow
+    // Follow
     @PostMapping("user/{userId}/follow/{followerId}")
     public ResponseEntity<String> followUser(@PathVariable int userId, @PathVariable int followerId) {
         try {
@@ -99,6 +103,18 @@ public class UserController {
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("user/{id}/conversations")
+    public List<Conversation> getUserConversations(@PathVariable int id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+
+        if(currentUser != null) {
+            if(currentUser.getUserId() == id) return userService.getUserConversations(id);
+        }
+
+        return null;
     }
 
 }
