@@ -21,7 +21,7 @@ public class ConversationService {
         return this.conversationRepository.sendMessage(request);
     }
 
-    public ServiceResultData addNewConversation(NewConversationRequest request, Integer senderId, Integer receiverId) {
-        return this.conversationRepository.addNewConversation(request, senderId, receiverId);
+    public Integer getMessageCount(int senderId, int receiverId) {
+        return conversationRepository.getMessageCount(senderId, receiverId);
     }
 }

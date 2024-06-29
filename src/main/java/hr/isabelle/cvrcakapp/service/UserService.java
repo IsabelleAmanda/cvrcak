@@ -85,4 +85,8 @@ public class UserService {
     }
 
     public List<Conversation> getUserConversations(int id) { return userRepository.getUserConversations(id); }
+
+    public Conversation getConversation(int senderId, int receiverId) {
+        return userRepository.getConversation(senderId, receiverId);
+    }
 }

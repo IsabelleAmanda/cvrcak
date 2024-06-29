@@ -37,28 +37,16 @@ public class ConversationRepository {
         return new ServiceResultData(true, request.messageId);
     }
 
-    public ServiceResultData addNewConversation(NewConversationRequest request, Integer senderId, Integer receiverId) {
+    public Integer getMessageCount(int senderId, int receiverId) {
+        String sqlQuery = """
+            SELECT COUNT(*) FROM MESSAGE WHERE (SENDER_ID = :senderId AND RECEIVER_ID = :receiverId)
+                OR (SENDER_ID = :receiverId AND RECEIVER_ID = :senderId)
+                        """;
 
-        List<Integer> userId = namedParameterJdbcTemplate.queryForList( """
-                SELECT M.SENDER_ID FROM MESSAGE AS M WHERE M.ID_MESSAGE =
-                (SELECT MIN(M.ID_MESSAGE) FROM MESSAGE AS M WHERE (M.SENDER_ID = :senderId AND M.RECEIVER_ID = :receiverId)
-                OR (M.SENDER_ID = :receiverId AND M.RECEIVER_ID = :senderId)) 
-                """,
-                new MapSqlParameterSource()
-                        .addValue("senderId", senderId)
-                        .addValue("receiverId", receiverId),
-                Integer.class);
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+                .addValue("senderId", senderId)
+                .addValue("receiverId", receiverId);
 
-        String sqlInsert = """
-                INSERT INTO CONVERSATION(USER_ID, MESSAGE_ID)
-                VALUES(:userId, :messageId)
-                """.stripIndent();
-
-        SqlParameterSource sqlParameters = new MapSqlParameterSource()
-                .addValue("userId", userId)
-                .addValue("messageId", request.messageId);
-
-        namedParameterJdbcTemplate.update(sqlInsert, sqlParameters);
-        return new ServiceResultData(true, request.conversationId);
+        return namedParameterJdbcTemplate.queryForObject(sqlQuery, parameterSource, Integer.class);
     }
 }

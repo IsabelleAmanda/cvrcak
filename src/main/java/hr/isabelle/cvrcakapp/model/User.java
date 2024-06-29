@@ -1,5 +1,6 @@
 package hr.isabelle.cvrcakapp.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,8 +25,10 @@ public class User implements UserDetails {
     String email;
     String country;
     Character gender;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy")
     Date birthday;
     String image;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy")
     Date registerDate;
     Boolean isDeleted;
     List<User> followers;

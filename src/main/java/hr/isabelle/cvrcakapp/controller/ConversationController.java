@@ -37,9 +37,15 @@ public class ConversationController{
         return null;
     }
 
-    //TODO: razmislit da se zapravo makne path variable i stavlja se u body putem requesta
-    @RequestMapping(value = "conversation/new/{senderId}/{receiverId}", method = RequestMethod.POST)
-    public ServiceResultData addNewConversation(@RequestBody @Validated NewConversationRequest request, @PathVariable Integer senderId, @PathVariable Integer receiverId){
-        return conversationService.addNewConversation(request, senderId, receiverId);
+    @RequestMapping(value = "message/count/{senderId}/{receiverId}")
+    public Integer getMessageCount(@PathVariable int senderId, @PathVariable int receiverId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        User currentUser = (User) authentication.getPrincipal();
+        if(Objects.equals(senderId, currentUser.getUserId())) {
+            return conversationService.getMessageCount(senderId, receiverId);
+        }
+
+        return 0;
     }
 }

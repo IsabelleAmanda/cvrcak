@@ -24,6 +24,7 @@ public class PostListMapper implements RowMapper<Post> {
         post.setContent(rs.getString("POST_CONTENT"));
         post.setImage(rs.getString("IMAGE"));
         post.setPostingDate(rs.getTimestamp("POSTING_DATETIME"));
+        post.setIsDeleted(rs.getBoolean("IS_DELETED"));
         post.setUpdateDate(rs.getDate("UPDATE_DATETIME"));
         post.setDeleteDate(rs.getDate("DELETE_DATETIME"));
         post.setIsPublic(rs.getBoolean("IS_PUBLIC"));

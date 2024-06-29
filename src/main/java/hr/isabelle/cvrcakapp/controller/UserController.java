@@ -5,6 +5,7 @@ import hr.isabelle.cvrcakapp.model.Message;
 import hr.isabelle.cvrcakapp.model.Post;
 import hr.isabelle.cvrcakapp.model.User;
 import hr.isabelle.cvrcakapp.model.request.NewUserRequest;
+import hr.isabelle.cvrcakapp.service.ConversationService;
 import hr.isabelle.cvrcakapp.service.UserService;
 import hr.isabelle.cvrcakapp.utils.ServiceResultData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +113,18 @@ public class UserController {
 
         if(currentUser != null) {
             if(currentUser.getUserId() == id) return userService.getUserConversations(id);
+        }
+
+        return null;
+    }
+
+    @GetMapping(value = "user/conversation/{senderId}/{receiverId}")
+    public Conversation getConversation(@PathVariable int senderId, @PathVariable int receiverId) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User currentUser = (User) authentication.getPrincipal();
+
+        if(currentUser != null) {
+            if(currentUser.getUserId() == senderId) return userService.getConversation(senderId, receiverId);
         }
 
         return null;

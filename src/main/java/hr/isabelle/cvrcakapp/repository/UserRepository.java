@@ -146,7 +146,7 @@ public class UserRepository {
     }
     public List<User> getUsersByName(String name) {
         String sqlQuery = """
-            SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, EMAIL, BIRTHDAY, IMAGE
+            SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, PASSWORD, GENDER, EMAIL, BIRTHDAY, IMAGE
             FROM KORISNIK
             WHERE FIRST_NAME LIKE :name OR LAST_NAME LIKE :name
         """.stripIndent();
@@ -265,6 +265,7 @@ public class UserRepository {
                     SELECT * FROM KORISNIK
                     WHERE ID_USER = :userId
                 """.stripIndent();
+
         SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("userId", userId);
         return namedParameterJdbcTemplate.queryForObject(sqlQuery, parameterSource, new UserMapper());
     }
@@ -332,5 +333,25 @@ public class UserRepository {
         }
 
         return conversations;
+    }
+
+    public Conversation getConversation(int senderId, int receiverId) {
+        String sqlQuery = """
+                SELECT * FROM MESSAGE WHERE (SENDER_ID = :senderId AND RECEIVER_ID = :receiverId)
+                OR (SENDER_ID = :receiverId AND RECEIVER_ID = :senderId)
+                """;
+
+        SqlParameterSource parameterSource = new MapSqlParameterSource()
+                .addValue("senderId", senderId)
+                .addValue("receiverId", receiverId);
+
+        List<Message> messages = namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new MessageMapper());
+
+        Conversation conversation = new Conversation();
+        conversation.setId(0);
+        conversation.addParticipants(senderId, receiverId);
+        conversation.setMessages(messages);
+
+        return conversation;
     }
 }

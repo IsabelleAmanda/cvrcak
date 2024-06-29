@@ -1,5 +1,6 @@
 package hr.isabelle.cvrcakapp.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,10 +18,14 @@ public class Post {
     String title;
     String content;
     String image;   //razmislit o Image image??? ili nes slicno tome
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy HH:mm")
     Date postingDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy HH:mm")
     Date updateDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MM-dd-yyyy HH:mm")
     Date deleteDate;
     Boolean isPublic;
+    Boolean isDeleted;
     Boolean isPermanent;
     DateTimeLiteralExpression.DateTime disappearTime;
     List<Comment> comments; //pogledati kak se radi kolekcija unutar mappera!

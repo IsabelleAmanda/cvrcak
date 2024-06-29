@@ -57,7 +57,7 @@ public class PostController {
     }
 
     @PutMapping(value = "post/update")
-    public ServiceResultData updatePost(@RequestBody @Validated PostRequest request){
+    public ServiceResultData updatePost(@RequestBody @Validated PostRequest request) {
         return postService.updatePost(request);
     }
 
