@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.sf.jsqlparser.expression.DateTimeLiteralExpression;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class Post {
     Boolean isPublic;
     Boolean isDeleted;
     Boolean isPermanent;
-    DateTimeLiteralExpression.DateTime disappearTime;
+    LocalDateTime disappearTime;
     List<Comment> comments; //pogledati kak se radi kolekcija unutar mappera!
     List<Like> likes;       //pogledati kak se radi kolekcija unutar mappera!
     Integer activityId;

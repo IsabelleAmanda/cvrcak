@@ -29,6 +29,7 @@ public class LikeController {
         return likeService.like(request);
     }
 
+
     @DeleteMapping(value = "unlike")
     public ServiceResultData unlikePost(@RequestBody @Validated LikeRequest request){
         return likeService.unlike(request);

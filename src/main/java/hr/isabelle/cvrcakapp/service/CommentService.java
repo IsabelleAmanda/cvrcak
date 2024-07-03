@@ -23,7 +23,7 @@ public class CommentService {
             return this.commentRepository.updateComment(request);
     }
 
-    public ServiceResultData deleteComment(CommentRequest request) {
-        return this.commentRepository.deleteComment(request);
+    public ServiceResultData deleteComment(Integer commentId){
+        return commentRepository.deleteComment(commentId);
     }
 }

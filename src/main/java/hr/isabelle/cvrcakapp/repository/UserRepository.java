@@ -10,6 +10,8 @@ import hr.isabelle.cvrcakapp.model.User;
 import hr.isabelle.cvrcakapp.model.request.NewUserRequest;
 import hr.isabelle.cvrcakapp.utils.JdbcParameters;
 import hr.isabelle.cvrcakapp.utils.ServiceResultData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -25,6 +27,7 @@ import java.util.List;
 public class UserRepository {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(UserRepository.class);
 
     public UserRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate){
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -238,8 +241,8 @@ public class UserRepository {
     // Follows a user in the database
     public void followUser(int userId, int followerId) {
         String sqlInsert = """
-                    INSERT INTO FOLLOW (FOLLOWING_USER_ID, FOLLOWED_USER_ID)
-                    VALUES (:followerId, :userId)
+                    INSERT INTO FOLLOW (FOLLOWING_USER_ID, FOLLOWED_USER_ID, FOLLOWING_TIMESTAMP)
+                    VALUES (:followerId, :userId, GETDATE())
                 """.stripIndent();
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
                 .addValue("followerId", followerId)

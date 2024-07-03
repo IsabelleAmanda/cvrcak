@@ -35,9 +35,9 @@ public class CommentController {
         return commentService.updateComment(request);
     }
 
-    @PutMapping(value = "comment/delete")
-    public ServiceResultData deleteComment(@RequestBody @Validated CommentRequest request){
-        return commentService.deleteComment(request);
+    @PutMapping(value = "comment/delete/{commentId}")
+    public ServiceResultData deleteComment(@PathVariable Integer commentId){
+        return commentService.deleteComment(commentId);
     }
 
 }

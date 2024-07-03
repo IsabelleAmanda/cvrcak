@@ -1,17 +1,11 @@
 package hr.isabelle.cvrcakapp.mapper;
 
-import hr.isabelle.cvrcakapp.model.Comment;
 import hr.isabelle.cvrcakapp.model.Post;
 import lombok.NoArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.sql.Timestamp;
 
 @NoArgsConstructor
 public class PostListMapper implements RowMapper<Post> {
@@ -29,7 +23,10 @@ public class PostListMapper implements RowMapper<Post> {
         post.setDeleteDate(rs.getDate("DELETE_DATETIME"));
         post.setIsPublic(rs.getBoolean("IS_PUBLIC"));
         post.setIsPermanent(rs.getBoolean("IS_PERMANENT"));
-
+        Timestamp timestamp = rs.getTimestamp("DISAPEAR_DATETIME");
+        if (timestamp != null) {
+            post.setDisappearTime(timestamp.toLocalDateTime());
+        }
         //TODO: istražiti kako se settira kolekcija
         post.setComments(null);
         post.setLikes(null);

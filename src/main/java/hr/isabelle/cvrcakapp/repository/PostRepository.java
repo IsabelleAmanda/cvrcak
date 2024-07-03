@@ -24,6 +24,30 @@ public class PostRepository {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
+    public List<Post> getPostsByTitle(String title){
+        try{
+            JdbcParameters jdbcParameters = sqlPostsByTitle(title);
+
+            List<Post> posts = namedParameterJdbcTemplate.query(jdbcParameters.sqlQuery,
+                    jdbcParameters.sqlParameters,
+                    new hr.isabelle.cvrcakapp.mapper.PostListMapper());
+            return posts;
+        }
+        catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private JdbcParameters sqlPostsByTitle(String title) {
+        String sqlQuery = """
+                SELECT * FROM POST WHERE UPPER(POST_TITLE) LIKE UPPER(:title)
+            """.stripIndent();
+
+        MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
+        sqlParameterSource.addValue("title", title + "%");
+        return new JdbcParameters(sqlQuery, sqlParameterSource);
+    }
+
     public List<Post> getAllPosts(){
         try{
             JdbcParameters jdbcParameters = sqlAllPosts();
@@ -86,9 +110,9 @@ public class PostRepository {
 
     private JdbcParameters sqlComments(Integer postId){
         String sqlQuery = """
-                    SELECT USER_ID, COMMENT_CONTENT, COMMENTING_DATETIME, UPDATE_DATETIME, DELETE_DATETIME FROM POST_COMMENT
-                    WHERE POST_ID = :postId AND DELETE_DATETIME IS NULL
-                """.stripIndent();
+                SELECT ID_COMMENT, POST_ID, USER_ID, COMMENT_CONTENT, COMMENTING_DATETIME, UPDATE_DATETIME, DELETE_DATETIME FROM POST_COMMENT
+                WHERE POST_ID = :postId AND DELETE_DATETIME IS NULL
+            """.stripIndent();
 
         MapSqlParameterSource sqlParameterSource = new MapSqlParameterSource();
         sqlParameterSource.addValue("postId", postId);

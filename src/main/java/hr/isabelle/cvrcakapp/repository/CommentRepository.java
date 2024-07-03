@@ -48,16 +48,16 @@ public class CommentRepository {
         return new ServiceResultData(true, request.commentId);
     }
 
-    public ServiceResultData deleteComment(CommentRequest request) {
+    public ServiceResultData deleteComment(Integer commentId) {
         String sqlUpdate = """
-                UPDATE POST_COMMENT SET DELETE_DATETIME = GETDATE()
-                WHERE ID_COMMENT = :commentId
-                """.stripIndent();
+            UPDATE POST_COMMENT SET DELETE_DATETIME = GETDATE()
+            WHERE ID_COMMENT = :commentId
+            """.stripIndent();
 
         SqlParameterSource sqlParameters = new MapSqlParameterSource()
-                .addValue("commentId", request.commentId);
+                .addValue("commentId", commentId);
 
         namedParameterJdbcTemplate.update(sqlUpdate, sqlParameters);
-        return new ServiceResultData(true, request.commentId);
+        return new ServiceResultData(true, commentId);
     }
 }

@@ -8,5 +8,4 @@ public class CommentRequest {
     public Integer userId;
     public Integer postId;
     public String content;
-
 }

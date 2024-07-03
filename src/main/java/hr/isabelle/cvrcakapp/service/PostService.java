@@ -19,6 +19,10 @@ public class PostService {
         this.postRepository = postRepository;
     }
 
+    public List<Post> getPostsByTitle(String title) {
+        return postRepository.getPostsByTitle(title);
+    }
+
     public List<Post> getAllPosts() {
         return postRepository.getAllPosts();
     }

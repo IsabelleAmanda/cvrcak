@@ -30,6 +30,11 @@ public class PostController {
         return postService.getAllPosts();
     }
 
+    @RequestMapping(value = "/post/title/{title}", method = RequestMethod.GET)
+    public List<Post> getPostsByTitle(@PathVariable String title){
+        return postService.getPostsByTitle(title);
+    }
+
     @RequestMapping(value = "/post/commentsCount/{postId}", method = RequestMethod.GET)
     public Integer getCommentsCount(@PathVariable Integer postId){
         return postService.getCommentsCount(postId);

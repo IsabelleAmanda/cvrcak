@@ -19,15 +19,29 @@ public class LikeRepository {
     }
 
     public ServiceResultData like(LikeRequest request) {
-        String sqlInsert = """
-                INSERT INTO POST_LIKE (POST_ID, USER_ID, LIKE_TIMESTAMP) VALUES (:postId, :userId, GETDATE())
-                """.stripIndent();
+        String sqlCheck = """
+            SELECT COUNT(*) FROM POST_LIKE WHERE POST_ID = :postId AND USER_ID = :userId
+            """.stripIndent();
 
-        SqlParameterSource sqlParameters = new MapSqlParameterSource()
+        SqlParameterSource sqlParametersCheck = new MapSqlParameterSource()
                 .addValue("postId", request.postId)
                 .addValue("userId", request.userId);
 
-        namedParameterJdbcTemplate.update(sqlInsert, sqlParameters);
+        int count = namedParameterJdbcTemplate.queryForObject(sqlCheck, sqlParametersCheck, Integer.class);
+
+        if (count > 0) {
+            return new ServiceResultData(false, "The post has already been liked by the user.");
+        }
+
+        String sqlInsert = """
+            INSERT INTO POST_LIKE (POST_ID, USER_ID, LIKE_TIMESTAMP) VALUES (:postId, :userId, GETDATE())
+            """.stripIndent();
+
+        SqlParameterSource sqlParametersInsert = new MapSqlParameterSource()
+                .addValue("postId", request.postId)
+                .addValue("userId", request.userId);
+
+        namedParameterJdbcTemplate.update(sqlInsert, sqlParametersInsert);
         return new ServiceResultData(true, request.likeId);
     }
 
