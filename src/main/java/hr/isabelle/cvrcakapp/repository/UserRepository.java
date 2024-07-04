@@ -151,7 +151,7 @@ public class UserRepository {
         String sqlQuery = """
             SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, PASSWORD, GENDER, EMAIL, BIRTHDAY, IMAGE
             FROM KORISNIK
-            WHERE FIRST_NAME LIKE :name OR LAST_NAME LIKE :name
+            WHERE USERNAME LIKE :name OR FIRST_NAME LIKE :name
         """.stripIndent();
         SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("name", name + "%");
         return namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new UserMapper());
@@ -191,7 +191,7 @@ public class UserRepository {
         int limit = 50;
         int offset = (page - 1) * limit;
         String sqlQuery = """
-            SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, PASSWORD, EMAIL, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP
+            SELECT ID_USER, USERNAME, FIRST_NAME, LAST_NAME, PASSWORD, EMAIL, GENDER, BIRTHDAY, IMAGE, REGISTER_TIMESTAMP
             FROM KORISNIK
             WHERE ID_USER IN (SELECT FOLLOWED_USER_ID FROM FOLLOW WHERE FOLLOWING_USER_ID = :userId)
             ORDER BY USERNAME
@@ -215,18 +215,6 @@ public class UserRepository {
         SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("userId", userId);
         return namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new PostListMapper());
     }
-
-    // Fetches comments on a specific post from the database
-    /*public List<Comment> getCommentsByPostId(int postId) {
-        String sqlQuery = """
-            SELECT * FROM POST_COMMENT
-            WHERE POST_ID = :postId
-        """.stripIndent();
-        SqlParameterSource parameterSource = new MapSqlParameterSource().addValue("postId", postId);
-        return namedParameterJdbcTemplate.query(sqlQuery, parameterSource, new CommentListMapper());
-    }*/
-
-
 
     // Fetches posts that a specific user has liked from the database
     public List<Post> getPostsLikedByUserId(int userId) {
